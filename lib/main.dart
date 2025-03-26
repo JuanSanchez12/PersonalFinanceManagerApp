@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'Widgets/navbar_widget.dart';
 import 'Screens/home_screen.dart';
 import 'Screens/add_transaction_screen.dart';
 import 'Screens/spending_breakdown_screen.dart';
 import 'Screens/savings_screen.dart';
 import 'Screens/report_screen.dart';
+import 'providers/transaction_provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => TransactionProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -38,7 +45,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const SpendingBreakdownScreen(),
-    const AddTransactionScreen(),
+    Container(),
     const SavingsScreen(),
     const ReportScreen(),
   ];
@@ -50,9 +57,16 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AddTransactionScreen(),
+              ),
+            );
+          } else {
+            setState(() => _currentIndex = index);
+          }
         },
       ),
     );

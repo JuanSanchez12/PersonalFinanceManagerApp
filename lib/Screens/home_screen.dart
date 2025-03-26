@@ -1,35 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/transaction.dart';
+import '../providers/transaction_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final transactionProvider = Provider.of<TransactionProvider>(context);
+
     return Scaffold(
       body: Column(
         children: [
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           
           // Balance Container
           Container(
             width: double.infinity,
             color: Colors.blue,
-            padding: EdgeInsets.all(20),
-            margin: EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.symmetric(horizontal: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'My Balance',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
-                  '\$5,284.50',
-                  style: TextStyle(
+                  '\$${transactionProvider.balance.toStringAsFixed(2)}',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
@@ -40,7 +45,7 @@ class HomeScreen extends StatelessWidget {
           ),
 
           // Transactions Title
-          Padding(
+          const Padding(
             padding: EdgeInsets.only(left: 10, top: 20, bottom: 10),
             child: Align(
               alignment: Alignment.centerLeft,
@@ -56,73 +61,37 @@ class HomeScreen extends StatelessWidget {
 
           // Transactions List
           Expanded(
-            child: ListView(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              children: [
-                ListTile(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              itemCount: transactionProvider.transactions.length,
+              itemBuilder: (ctx, index) {
+                final transaction = transactionProvider.transactions[index];
+                return ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.shopping_cart),
+                  leading: Icon(
+                    transaction.type == TransactionType.income 
+                      ? Icons.attach_money 
+                      : Icons.shopping_cart,
+                    color: transaction.type == TransactionType.income 
+                      ? Colors.green 
+                      : Colors.red,
+                  ),
                   title: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('Grocery Store'),
+                    child: Text(
+                      transaction.category ?? 'Income',
+                    ),
                   ),
-                  trailing: Text('\$85.40'),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.attach_money),
-                  title: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Salary'),
+                  trailing: Text(
+                    '\$${transaction.amount.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      color: transaction.type == TransactionType.income
+                        ? Colors.green
+                        : Colors.red,
+                    ),
                   ),
-                  trailing: Text('\$2500.00'),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.bolt),
-                  title: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Electric Bill'),
-                  ),
-                  trailing: Text('\$120.35'),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.movie),
-                  title: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Movie'),
-                  ),
-                  trailing: Text('\$24.00'),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.savings),
-                  title: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Savings'),
-                  ),
-                  trailing: Text('\$500.00'),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.build),
-                  title: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Hardware'),
-                  ),
-                  trailing: Text('\$45.20'),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(Icons.bolt),
-                  title: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Internet'),
-                  ),
-                  trailing: Text('\$65.00'),
-                ),
-              ],
+                );
+              },
             ),
           ),
         ],
