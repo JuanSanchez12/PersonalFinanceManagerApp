@@ -12,4 +12,13 @@ class Transaction {
     this.category,
     DateTime? date,
   }) : date = date ?? DateTime.now();
+
+  static const List<String> expenseCategories = [
+    'Food',
+    'Transport',
+    'Shopping',
+    'Bills',
+    'Entertainment',
+    'Other'
+  ];
 }
