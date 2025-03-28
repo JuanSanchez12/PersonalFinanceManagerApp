@@ -8,7 +8,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final transactionProvider = Provider.of<TransactionProvider>(context);
+    final provider = Provider.of<TransactionProvider>(context);
 
     return Scaffold(
       body: Column(
@@ -33,7 +33,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  '\$${transactionProvider.balance.toStringAsFixed(2)}',
+                  '\$${provider.availableBalance.toStringAsFixed(2)}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 30,
@@ -63,31 +63,43 @@ class HomeScreen extends StatelessWidget {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              itemCount: transactionProvider.transactions.length,
+              itemCount: provider.transactions.length,
               itemBuilder: (ctx, index) {
-                final transaction = transactionProvider.transactions[index];
+                final transaction = provider.transactions[index];
+                final isSavings = transaction.type == TransactionType.savings;
+                final isIncome = transaction.type == TransactionType.income;
+
                 return ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(
-                    transaction.type == TransactionType.income 
-                      ? Icons.attach_money 
-                      : Icons.shopping_cart,
-                    color: transaction.type == TransactionType.income 
-                      ? Colors.green 
-                      : Colors.red,
+                    isSavings
+                      ? Icons.savings
+                      : isIncome 
+                        ? Icons.attach_money 
+                        : Icons.shopping_cart,
+                    color: isSavings
+                      ? Colors.blue
+                      : isIncome
+                        ? Colors.green
+                        : Colors.red,
                   ),
-                  title: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      transaction.category ?? 'Income',
+                  title: Text(
+                    isSavings
+                      ? 'Savings Transfer'
+                      : transaction.category ?? 'Income',
+                    style: TextStyle(
+                      color: isSavings ? Colors.blue : Colors.black,
                     ),
                   ),
                   trailing: Text(
                     '\$${transaction.amount.toStringAsFixed(2)}',
                     style: TextStyle(
-                      color: transaction.type == TransactionType.income
-                        ? Colors.green
-                        : Colors.red,
+                      color: isSavings
+                        ? Colors.blue
+                        : isIncome
+                          ? Colors.green
+                          : Colors.red,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 );

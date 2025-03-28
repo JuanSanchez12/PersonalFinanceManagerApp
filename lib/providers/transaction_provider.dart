@@ -2,20 +2,26 @@ import 'package:flutter/material.dart';
 import '../models/transaction.dart';
 
 class TransactionProvider extends ChangeNotifier {
-  final List<Transaction> _transactions = [];
+  List<Transaction> _transactions = [];
 
   List<Transaction> get transactions => _transactions;
 
-  double get balance {
-    double total = 0;
-    for (var transaction in _transactions) {
-      if (transaction.type == TransactionType.income) {
-        total += transaction.amount;
-      } else {
-        total -= transaction.amount;
+  double get availableBalance {
+    return _transactions.fold(0, (sum, transaction) {
+      switch (transaction.type) {
+        case TransactionType.income:
+          return sum + transaction.amount;
+        case TransactionType.expense:
+        case TransactionType.savings:
+          return sum - transaction.amount;
       }
-    }
-    return total;
+    });
+  }
+
+  double get totalSavings {
+    return _transactions
+        .where((t) => t.type == TransactionType.savings)
+        .fold(0, (sum, t) => sum + t.amount);
   }
 
   void addTransaction(Transaction newTransaction) {

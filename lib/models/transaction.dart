@@ -1,4 +1,8 @@
-enum TransactionType { income, expense }
+enum TransactionType {
+  income,
+  expense,
+  savings
+}
 
 class Transaction {
   final TransactionType type;
@@ -11,7 +15,13 @@ class Transaction {
     required this.amount,
     this.category,
     DateTime? date,
-  }) : date = date ?? DateTime.now();
+  })  : date = date ?? DateTime.now(),
+        assert(
+          (type == TransactionType.expense && category != null) ||
+              (type != TransactionType.expense),
+          'Category must be provided for expenses',
+        ),
+        assert(amount > 0, 'Amount must be positive');
 
   static const List<String> expenseCategories = [
     'Food',
@@ -19,6 +29,6 @@ class Transaction {
     'Shopping',
     'Bills',
     'Entertainment',
-    'Other'
+    'Other',
   ];
 }

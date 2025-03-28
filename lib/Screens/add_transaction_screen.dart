@@ -16,14 +16,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   
   TransactionType _selectedType = TransactionType.expense;
   String? _selectedCategory;
-  final List<String> _expenseCategories = [
-    'Food',
-    'Transport',
-    'Shopping',
-    'Bills',
-    'Entertainment',
-    'Other'
-  ];
 
   @override
   void dispose() {
@@ -36,9 +28,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       final newTransaction = Transaction(
         type: _selectedType,
         amount: double.parse(_amountController.text),
-        category: _selectedType == TransactionType.expense 
-            ? _selectedCategory
-            : null,
+        category: _selectedType == TransactionType.income 
+            ? null 
+            : _selectedCategory,
       );
 
       Provider.of<TransactionProvider>(context, listen: false)
@@ -53,10 +45,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Transaction'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -77,28 +65,26 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     children: [
                       Expanded(
                         child: RadioListTile<TransactionType>(
-                          title: const Text('Expense'),
-                          value: TransactionType.expense,
+                          title: const Text('Income'),
+                          value: TransactionType.income,
                           groupValue: _selectedType,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedType = value!;
-                              _selectedCategory = null;
-                            });
-                          },
+                          onChanged: (value) => setState(() => _selectedType = value!),
                         ),
                       ),
                       Expanded(
                         child: RadioListTile<TransactionType>(
-                          title: const Text('Income'),
-                          value: TransactionType.income,
+                          title: const Text('Expense'),
+                          value: TransactionType.expense,
                           groupValue: _selectedType,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedType = value!;
-                              _selectedCategory = null;
-                            });
-                          },
+                          onChanged: (value) => setState(() => _selectedType = value!),
+                        ),
+                      ),
+                      Expanded(
+                        child: RadioListTile<TransactionType>(
+                          title: const Text('Savings'),
+                          value: TransactionType.savings,
+                          groupValue: _selectedType,
+                          onChanged: (value) => setState(() => _selectedType = value!),
                         ),
                       ),
                     ],
@@ -106,32 +92,33 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ],
               ),
 
-              const SizedBox(height: 20),
-
-              // Category Dropdown
+              // Category Dropdown (shown only for expenses)
               if (_selectedType == TransactionType.expense)
-                DropdownButtonFormField<String>(
-                  value: _selectedCategory,
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: _expenseCategories
-                      .map((category) => DropdownMenuItem(
-                            value: category,
-                            child: Text(category),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() => _selectedCategory = value);
-                  },
-                  validator: (value) {
-                    if (_selectedType == TransactionType.expense &&
-                        (value == null || value.isEmpty)) {
-                      return 'Please select a category';
-                    }
-                    return null;
-                  },
+                Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    DropdownButtonFormField<String>(
+                      value: _selectedCategory,
+                      decoration: const InputDecoration(
+                        labelText: 'Category',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: Transaction.expenseCategories
+                          .map((category) => DropdownMenuItem(
+                                value: category,
+                                child: Text(category),
+                              ))
+                          .toList(),
+                      onChanged: (value) => setState(() => _selectedCategory = value),
+                      validator: (value) {
+                        if (_selectedType == TransactionType.expense &&
+                            (value == null || value.isEmpty)) {
+                          return 'Please select a category';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
                 ),
 
               const SizedBox(height: 20),
