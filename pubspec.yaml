@@ -35,12 +35,17 @@ dependencies:
     git:
       url: https://github.com/imaNNeo/fl_chart.git
       ref: main
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.0.11
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.4
   flutter_test:
     sdk: flutter
 

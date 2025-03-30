@@ -6,9 +6,14 @@ import 'Screens/add_transaction_screen.dart';
 import 'Screens/spending_breakdown_screen.dart';
 import 'Screens/savings_screen.dart';
 import 'Screens/report_screen.dart';
+import 'database/database_helper.dart';
 import 'providers/transaction_provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await HiveService.init();
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => TransactionProvider(),

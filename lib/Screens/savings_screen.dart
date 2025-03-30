@@ -1,87 +1,88 @@
-import 'package:finance_app/models/goal.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/goal.dart';
 import '../providers/transaction_provider.dart';
-import '../Screens/add_goal_screen.dart';
+import '../screens/add_goal_screen.dart';
 
 class SavingsScreen extends StatelessWidget {
   const SavingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<TransactionProvider>(context);
-    final totalSavings = provider.totalSavings;
-    final availableSavings = provider.availableSavings;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Savings'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Total Savings Card
-            _buildSavingsCard(
-              title: 'Total Savings',
-              amount: totalSavings,
-              icon: Icons.savings,
-              color: Colors.blue[700]!,
-            ),
-            const SizedBox(height: 20),
-
-            // Available Savings Card
-            _buildSavingsCard(
-              title: 'Available Savings',
-              amount: availableSavings,
-              icon: Icons.account_balance_wallet,
-              color: Colors.green[700]!,
-            ),
-            
-            const SizedBox(height: 20),
-            
-            // Goals Section Header
-            const Padding(
-              padding: EdgeInsets.only(bottom: 10),
-              child: Text(
-                'Your Goals',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+      body: Consumer<TransactionProvider>(
+        builder: (context, provider, _) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Total Savings Card
+                _buildSavingsCard(
+                  title: 'Total Savings',
+                  amount: provider.totalSavings,
+                  icon: Icons.savings,
+                  color: Colors.blue[700]!,
                 ),
-              ),
-            ),
-            
-            // Goals List
-            Expanded(
-              child: provider.goals.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'No goals yet\nTap the + button to add one',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: provider.goals.length,
-                      itemBuilder: (context, index) {
-                        final goal = provider.goals[index];
-                        return _buildGoalCard(context, goal, index, provider);
-                      },
+                const SizedBox(height: 20),
+
+                // Available Savings Card
+                _buildSavingsCard(
+                  title: 'Available Savings',
+                  amount: provider.availableSavings,
+                  icon: Icons.account_balance_wallet,
+                  color: Colors.green[700]!,
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Goals Section
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    'Your Goals',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+                ),
+                
+                // Goals List
+                Expanded(
+                  child: provider.goals.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No goals yet\nTap the + button to add one',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: provider.goals.length,
+                          itemBuilder: (context, index) {
+                            final goal = provider.goals[index];
+                            return _buildGoalCard(context, goal, index, provider);
+                          },
+                        ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const AddGoalScreen(),
             ),
           );
+          Provider.of<TransactionProvider>(context, listen: false).refreshData();
         },
         child: const Icon(Icons.add),
       ),
@@ -207,10 +208,10 @@ class SavingsScreen extends StatelessWidget {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (formKey.currentState!.validate()) {
                   final amount = double.parse(amountController.text);
-                  provider.contributeToGoal(goalIndex, amount);
+                  await provider.contributeToGoal(goalIndex, amount);
                   Navigator.pop(context);
                 }
               },

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import '../models/transaction.dart';
 import '../models/goal.dart';
+import '../database/database_helper.dart';
 
 class TransactionProvider extends ChangeNotifier {
-  List<Transaction> _transactions = [];
-  List<Goal> _goals = [];
-
-  List<Transaction> get transactions => _transactions;
-  List<Goal> get goals => _goals;
+  List<Transaction> get transactions => 
+      HiveService.transactionsBox.values.toList().cast<Transaction>();
+  
+  List<Goal> get goals => 
+      HiveService.goalsBox.values.toList().cast<Goal>();
 
   double get availableBalance {
-    return _transactions.fold(0.0, (double sum, transaction) {
+    return transactions.fold(0.0, (double sum, transaction) {
       switch (transaction.type) {
         case TransactionType.income:
           return sum + transaction.amount;
@@ -22,36 +23,43 @@ class TransactionProvider extends ChangeNotifier {
   }
 
   double get totalSavings {
-    return _transactions
+    return transactions
         .where((t) => t.type == TransactionType.savings)
         .fold(0.0, (double sum, t) => sum + t.amount);
   }
 
   double get availableSavings {
-    final totalInGoals = _goals.fold(0.0, (sum, goal) => sum + goal.contributedAmount);
+    final totalInGoals = goals.fold(0.0, (sum, goal) => sum + goal.contributedAmount);
     return totalSavings - totalInGoals;
   }
 
-  void addTransaction(Transaction newTransaction) {
-    _transactions.add(newTransaction);
+  Future<void> addTransaction(Transaction newTransaction) async {
+    await HiveService.transactionsBox.add(newTransaction);
     notifyListeners();
   }
 
-  void addGoal(Goal newGoal) {
-    _goals.add(newGoal);
+  Future<void> addGoal(Goal newGoal) async {
+    await HiveService.goalsBox.add(newGoal);
     notifyListeners();
   }
 
-  void contributeToGoal(int goalIndex, double amount) {
-    final goal = _goals[goalIndex];
+  Future<void> contributeToGoal(int goalIndex, double amount) async {
+    final goalKey = HiveService.goalsBox.keyAt(goalIndex) as int;
+    final goal = HiveService.goalsBox.get(goalKey) as Goal;
     
-    _goals[goalIndex] = Goal(
+    final updatedGoal = Goal(
       name: goal.name,
       targetAmount: goal.targetAmount,
       contributedAmount: goal.contributedAmount + amount,
       createdDate: goal.createdDate,
     );
     
+    await HiveService.goalsBox.put(goalKey, updatedGoal);
     notifyListeners();
   }
+
+  Future<void> refreshData() async {
+  await HiveService.transactionsBox.flush();
+  notifyListeners();
+}
 }
