@@ -16,6 +16,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   
   TransactionType _selectedType = TransactionType.expense;
   String? _selectedCategory;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -23,20 +24,48 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     super.dispose();
   }
 
-  void _submitTransaction() {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _submitTransaction() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSubmitting = true);
+    
+    final amount = double.parse(_amountController.text);
+    final provider = Provider.of<TransactionProvider>(context, listen: false);
+    
+    // Check balance for expenses/savings
+    if (_selectedType != TransactionType.income) {
+      if (amount > provider.availableBalance) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Insufficient balance! Available: \$${provider.availableBalance.toStringAsFixed(2)}',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() => _isSubmitting = false);
+        return;
+      }
+    }
+
+    try {
       final newTransaction = Transaction(
         type: _selectedType,
-        amount: double.parse(_amountController.text),
-        category: _selectedType == TransactionType.income 
-            ? null 
-            : _selectedCategory,
+        amount: amount,
+        category: _selectedType == TransactionType.income ? null : _selectedCategory,
       );
 
-      Provider.of<TransactionProvider>(context, listen: false)
-          .addTransaction(newTransaction);
-
-      Navigator.pop(context);
+      await provider.addTransaction(newTransaction);
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
@@ -142,16 +171,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
               const SizedBox(height: 30),
 
-              // Submit Button
+              // Submit Button (original version)
               ElevatedButton(
-                onPressed: _submitTransaction,
+                onPressed: _isSubmitting ? null : _submitTransaction,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text(
-                  'Add Transaction',
-                  style: TextStyle(fontSize: 18),
-                ),
+                child: _isSubmitting
+                    ? const CircularProgressIndicator(
+                        color: Colors.white,
+                      )
+                    : const Text(
+                        'Add Transaction',
+                        style: TextStyle(fontSize: 18),
+                      ),
               ),
             ],
           ),
