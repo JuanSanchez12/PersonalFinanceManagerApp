@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../models/transaction.dart';
 import '../providers/transaction_provider.dart';
 
+/// Screen displaying financial reports with charts and summaries
 class ReportScreen extends StatelessWidget {
   const ReportScreen({super.key});
 
@@ -15,6 +16,7 @@ class ReportScreen extends StatelessWidget {
       ),
       body: Consumer<TransactionProvider>(
         builder: (context, provider, _) {
+          // Calculate totals for each transaction type
           final income = provider.transactions
               .where((t) => t.type == TransactionType.income)
               .fold(0.0, (sum, t) => sum + t.amount);
@@ -31,7 +33,7 @@ class ReportScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                // Bar Chart
+                // Bar Chart Visualization
                 SizedBox(
                   height: 200,
                   child: BarChart(
@@ -78,7 +80,7 @@ class ReportScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 
-                // Summary Cards
+                // Financial Summary Cards
                 _buildSummaryCard('Total Income', income, Colors.green),
                 _buildSummaryCard('Total Expenses', expense, Colors.red),
                 _buildSummaryCard('Total Savings', savings, Colors.blue),
@@ -90,6 +92,7 @@ class ReportScreen extends StatelessWidget {
     );
   }
 
+  /// Creates a single bar for the bar chart
   BarChartGroupData _buildBar(String label, double value, Color color, int x) {
     return BarChartGroupData(
       x: x,
@@ -104,6 +107,7 @@ class ReportScreen extends StatelessWidget {
     );
   }
 
+  /// Builds a summary card for financial metrics
   Widget _buildSummaryCard(String title, double amount, Color color) {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),

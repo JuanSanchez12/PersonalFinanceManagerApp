@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/transaction.dart';
 import '../providers/transaction_provider.dart';
 
+/// Home screen displaying financial overview and recent transactions
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -16,7 +17,7 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Balance Card
+            // Balance summary card
             _buildFinanceCard(
               title: 'Available Balance',
               amount: provider.availableBalance,
@@ -25,7 +26,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Transactions Header
+            // Recent transactions section header
             const Text(
               'Recent Transactions',
               style: TextStyle(
@@ -35,7 +36,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
 
-            // Transactions List
+            // Transactions list (or empty state)
             Expanded(
               child: provider.transactions.isEmpty
                   ? const Center(
@@ -58,6 +59,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  /// Reusable card widget for financial metrics (balance, savings, etc.)
   Widget _buildFinanceCard({
     required String title,
     required double amount,
@@ -99,9 +101,11 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  /// Builds a transaction list item with appropriate styling
   Widget _buildTransactionCard(Transaction transaction) {
     final isSavings = transaction.type == TransactionType.savings;
     final isIncome = transaction.type == TransactionType.income;
+    // Color coding: blue for savings, green for income, red for expenses
     final iconColor = isSavings ? Colors.blue : isIncome ? Colors.green : Colors.red;
 
     return Card(
@@ -110,6 +114,7 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
+            // Transaction type icon
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -126,6 +131,8 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
+            
+            // Transaction details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,6 +155,8 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
+            
+            // Transaction amount
             Text(
               '\$${transaction.amount.toStringAsFixed(2)}',
               style: TextStyle(

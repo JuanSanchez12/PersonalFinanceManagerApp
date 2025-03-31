@@ -1,27 +1,29 @@
 import 'package:hive/hive.dart';
 
-part 'transaction.g.dart'; // This will be generated
+part 'transaction.g.dart'; // Auto-generated Hive adapter file
 
-@HiveType(typeId: 0) // Unique type identifier
+// Transaction types supported by the app
+@HiveType(typeId: 0) // Unique identifier for Hive
 enum TransactionType {
   @HiveField(0) income,
   @HiveField(1) expense,
   @HiveField(2) savings,
 }
 
-@HiveType(typeId: 1) // Unique type identifier
+// Main transaction model for financial records
+@HiveType(typeId: 1) // Unique identifier for Hive
 class Transaction {
   @HiveField(0)
   final TransactionType type;
   
   @HiveField(1)
-  final double amount;
+  final double amount; // Always stored as positive value
   
   @HiveField(2)
-  final String? category;
+  final String? category; // Required only for expense types
   
   @HiveField(3)
-  final DateTime date;
+  final DateTime date; // Auto-defaults to current time if not provided
 
   Transaction({
     required this.type,
@@ -29,6 +31,7 @@ class Transaction {
     this.category,
     DateTime? date,
   })  : date = date ?? DateTime.now(),
+        // Validation rules:
         assert(
           (type == TransactionType.expense && category != null) ||
               (type != TransactionType.expense),
@@ -36,7 +39,7 @@ class Transaction {
         ),
         assert(amount > 0, 'Amount must be positive');
 
-  // Your existing categories list remains unchanged
+  // Predefined categories for expense tracking
   static const List<String> expenseCategories = [
     'Food',
     'Transport',

@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../models/transaction.dart';
 import '../providers/transaction_provider.dart';
 
+/// Screen displaying visual breakdown of spending by category
 class SpendingBreakdownScreen extends StatelessWidget {
   const SpendingBreakdownScreen({super.key});
 
@@ -17,16 +18,18 @@ class SpendingBreakdownScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Consumer<TransactionProvider>(
           builder: (context, provider, _) {
+            // Filter and process expense transactions
             final expenses = provider.transactions
                 .where((t) => t.type == TransactionType.expense)
                 .toList();
 
-            // Calculate category totals
+            // Initialize category totals map with all possible categories
             final categoryTotals = Map<String, double>.fromIterables(
               Transaction.expenseCategories,
               List.filled(Transaction.expenseCategories.length, 0),
             );
 
+            // Calculate totals for each category
             for (final expense in expenses) {
               if (expense.category != null) {
                 categoryTotals[expense.category!] =
@@ -39,7 +42,7 @@ class SpendingBreakdownScreen extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Total Expenses Card
+                // Summary card showing total expenses
                 _buildFinanceCard(
                   title: 'Total Expenses',
                   amount: totalExpenses,
@@ -48,8 +51,9 @@ class SpendingBreakdownScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
+                // Only show chart if there are expenses
                 if (totalExpenses > 0) ...[
-                  // Pie Chart Card
+                  // Pie chart visualization
                   Card(
                     elevation: 3,
                     child: Padding(
@@ -95,7 +99,7 @@ class SpendingBreakdownScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                 ],
 
-                // Category List
+                // Category breakdown list header
                 const Text(
                   'Expense Categories',
                   style: TextStyle(
@@ -104,6 +108,8 @@ class SpendingBreakdownScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
+                
+                // List of expense categories with amounts
                 Expanded(
                   child: categoryTotals.values.any((total) => total > 0)
                       ? ListView.builder(
@@ -119,6 +125,7 @@ class SpendingBreakdownScreen extends StatelessWidget {
                                 padding: const EdgeInsets.all(12.0),
                                 child: Row(
                                   children: [
+                                    // Category icon
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
@@ -131,6 +138,8 @@ class SpendingBreakdownScreen extends StatelessWidget {
                                       ),
                                     ),
                                     const SizedBox(width: 12),
+                                    
+                                    // Category name
                                     Expanded(
                                       child: Text(
                                         category,
@@ -139,6 +148,8 @@ class SpendingBreakdownScreen extends StatelessWidget {
                                         ),
                                       ),
                                     ),
+                                    
+                                    // Category total
                                     Text(
                                       '\$${total.toStringAsFixed(2)}',
                                       style: TextStyle(
@@ -168,6 +179,7 @@ class SpendingBreakdownScreen extends StatelessWidget {
     );
   }
 
+  /// Builds a summary card for financial metrics
   Widget _buildFinanceCard({
     required String title,
     required double amount,
@@ -209,6 +221,7 @@ class SpendingBreakdownScreen extends StatelessWidget {
     );
   }
 
+  /// Returns a consistent color for each expense category
   Color _getCategoryColor(String category) {
     final index = Transaction.expenseCategories.indexOf(category);
     final colors = [

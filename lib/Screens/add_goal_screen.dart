@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/goal.dart';
 import '../providers/transaction_provider.dart';
 
+/// Screen for creating new savings goals
 class AddGoalScreen extends StatefulWidget {
   const AddGoalScreen({super.key});
 
@@ -11,12 +12,14 @@ class AddGoalScreen extends StatefulWidget {
 }
 
 class _AddGoalScreenState extends State<AddGoalScreen> {
+  // Form management
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _amountController = TextEditingController();
 
   @override
   void dispose() {
+    // Clean up controllers when widget is disposed
     _nameController.dispose();
     _amountController.dispose();
     super.dispose();
@@ -35,6 +38,7 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Goal name input field
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
@@ -49,6 +53,8 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                 },
               ),
               const SizedBox(height: 20),
+              
+              // Target amount input field
               TextFormField(
                 controller: _amountController,
                 decoration: const InputDecoration(
@@ -71,17 +77,22 @@ class _AddGoalScreenState extends State<AddGoalScreen> {
                 },
               ),
               const SizedBox(height: 30),
+              
+              // Save button
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
+                    // Create new goal from form data
                     final newGoal = Goal(
                       name: _nameController.text,
                       targetAmount: double.parse(_amountController.text),
                     );
                     
+                    // Save via TransactionProvider
                     Provider.of<TransactionProvider>(context, listen: false)
                         .addGoal(newGoal);
                     
+                    // Return to previous screen
                     Navigator.pop(context);
                   }
                 },

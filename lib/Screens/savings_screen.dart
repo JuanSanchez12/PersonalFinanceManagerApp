@@ -4,6 +4,7 @@ import '../models/goal.dart';
 import '../providers/transaction_provider.dart';
 import '../screens/add_goal_screen.dart';
 
+/// Screen for managing savings goals and tracking progress
 class SavingsScreen extends StatelessWidget {
   const SavingsScreen({super.key});
 
@@ -20,7 +21,7 @@ class SavingsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Total Savings Card
+                // Total Savings Overview Card
                 _buildSavingsCard(
                   title: 'Total Savings',
                   amount: provider.totalSavings,
@@ -29,7 +30,7 @@ class SavingsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Available Savings Card
+                // Available Savings Card (not allocated to goals)
                 _buildSavingsCard(
                   title: 'Available Savings',
                   amount: provider.availableSavings,
@@ -39,7 +40,7 @@ class SavingsScreen extends StatelessWidget {
                 
                 const SizedBox(height: 20),
                 
-                // Goals Section
+                // Goals Section Header
                 const Padding(
                   padding: EdgeInsets.only(bottom: 10),
                   child: Text(
@@ -51,7 +52,7 @@ class SavingsScreen extends StatelessWidget {
                   ),
                 ),
                 
-                // Goals List
+                // Goals List (or empty state)
                 Expanded(
                   child: provider.goals.isEmpty
                       ? const Center(
@@ -74,6 +75,7 @@ class SavingsScreen extends StatelessWidget {
           );
         },
       ),
+      // Add new goal button
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await Navigator.push(
@@ -82,6 +84,7 @@ class SavingsScreen extends StatelessWidget {
               builder: (context) => const AddGoalScreen(),
             ),
           );
+          // Refresh data after returning from AddGoalScreen
           Provider.of<TransactionProvider>(context, listen: false).refreshData();
         },
         child: const Icon(Icons.add),
@@ -89,6 +92,7 @@ class SavingsScreen extends StatelessWidget {
     );
   }
 
+  /// Builds an individual goal card with progress tracking
   Widget _buildGoalCard(BuildContext context, Goal goal, int index, TransactionProvider provider) {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
@@ -97,6 +101,7 @@ class SavingsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Goal name and edit button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -114,6 +119,8 @@ class SavingsScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
+            
+            // Amount progress text
             Text(
               '\$${goal.contributedAmount.toStringAsFixed(2)} of \$${goal.targetAmount.toStringAsFixed(2)}',
               style: TextStyle(
@@ -122,12 +129,16 @@ class SavingsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
+            
+            // Visual progress bar
             LinearProgressIndicator(
               value: goal.progress,
               backgroundColor: Colors.grey[200],
               color: goal.progress >= 1 ? Colors.green : Colors.blue,
               minHeight: 10,
             ),
+            
+            // Completion indicator
             if (goal.progress >= 1)
               const Padding(
                 padding: EdgeInsets.only(top: 8),
@@ -145,6 +156,7 @@ class SavingsScreen extends StatelessWidget {
     );
   }
 
+  /// Shows dialog for contributing to a savings goal
   void _showContributeDialog(BuildContext context, int goalIndex, TransactionProvider provider) {
     final goal = provider.goals[goalIndex];
     final availableSavings = provider.availableSavings;
@@ -161,16 +173,21 @@ class SavingsScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Available savings indicator
                 Text(
                   'Available Savings: \$${availableSavings.toStringAsFixed(2)}',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
+                
+                // Goal target indicator
                 Text(
                   'Goal Target: \$${goal.targetAmount.toStringAsFixed(2)}',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
+                
+                // Contribution amount input
                 TextFormField(
                   controller: amountController,
                   decoration: const InputDecoration(
@@ -223,6 +240,7 @@ class SavingsScreen extends StatelessWidget {
     );
   }
 
+  /// Reusable card widget for savings metrics
   Widget _buildSavingsCard({
     required String title,
     required double amount,

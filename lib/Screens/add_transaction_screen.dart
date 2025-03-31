@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/transaction.dart';
 import '../providers/transaction_provider.dart';
 
+/// Screen for adding new financial transactions (income, expenses, savings)
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
 
@@ -16,7 +17,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   
   TransactionType _selectedType = TransactionType.expense;
   String? _selectedCategory;
-  bool _isSubmitting = false;
+  bool _isSubmitting = false; // Tracks form submission state
 
   @override
   void dispose() {
@@ -24,6 +25,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     super.dispose();
   }
 
+  /// Handles transaction submission with validation and error handling
   Future<void> _submitTransaction() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -32,31 +34,28 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final amount = double.parse(_amountController.text);
     final provider = Provider.of<TransactionProvider>(context, listen: false);
     
-    // Check balance for expenses/savings
-    if (_selectedType != TransactionType.income) {
-      if (amount > provider.availableBalance) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Insufficient balance! Available: \$${provider.availableBalance.toStringAsFixed(2)}',
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-        setState(() => _isSubmitting = false);
-        return;
-      }
+    // Check available balance for non-income transactions
+    if (_selectedType != TransactionType.income && amount > provider.availableBalance) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Insufficient balance! Available: \$${provider.availableBalance.toStringAsFixed(2)}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      setState(() => _isSubmitting = false);
+      return;
     }
 
     try {
       final newTransaction = Transaction(
         type: _selectedType,
         amount: amount,
+        // Only include category for expense transactions
         category: _selectedType == TransactionType.income ? null : _selectedCategory,
       );
 
       await provider.addTransaction(newTransaction);
-      if (mounted) Navigator.pop(context);
+      if (mounted) Navigator.pop(context); // Close screen on success
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -82,7 +81,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Transaction Type Selector
+              // Transaction Type Radio Selector
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -115,7 +114,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ],
               ),
 
-              // Category Dropdown (shown only for expenses)
+              // Dynamic Category Selector (only shown for expenses)
               if (_selectedType == TransactionType.expense)
                 Column(
                   children: [
@@ -134,8 +133,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           .toList(),
                       onChanged: (value) => setState(() => _selectedCategory = value),
                       validator: (value) {
-                        if (_selectedType == TransactionType.expense &&
-                            (value == null || value.isEmpty)) {
+                        if (_selectedType == TransactionType.expense && value == null) {
                           return 'Please select a category';
                         }
                         return null;
@@ -146,7 +144,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
               const SizedBox(height: 20),
 
-              // Amount Input
+              // Amount Input Field
               TextFormField(
                 controller: _amountController,
                 decoration: const InputDecoration(
@@ -171,16 +169,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
               const SizedBox(height: 30),
 
-              // Submit Button (original version)
+              // Submit Button with loading state
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submitTransaction,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: _isSubmitting
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
-                      )
+                    ? const CircularProgressIndicator(color: Colors.white)
                     : const Text(
                         'Add Transaction',
                         style: TextStyle(fontSize: 18),

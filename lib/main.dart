@@ -10,10 +10,11 @@ import 'database/database_helper.dart';
 import 'providers/transaction_provider.dart';
 
 void main() async {
+  // Initialize Flutter engine and Hive database before app starts
   WidgetsFlutterBinding.ensureInitialized();
-
   await HiveService.init();
 
+  // Wrap app with TransactionProvider for state management
   runApp(
     ChangeNotifierProvider(
       create: (_) => TransactionProvider(),
@@ -29,10 +30,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Finance App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
       home: const MainScreen(),
+      theme: ThemeData(primarySwatch: Colors.blue),
     );
   }
 }
@@ -45,12 +44,13 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
+  int _currentIndex = 0; // Tracks active bottom nav item
 
+  // Screens corresponding to each bottom navigation item
   final List<Widget> _screens = [
     const HomeScreen(),
     const SpendingBreakdownScreen(),
-    Container(),
+    Container(), // Placeholder for the center FAB action
     const SavingsScreen(),
     const ReportScreen(),
   ];
@@ -62,13 +62,10 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: (index) {
+          // Special handling for center button (index 2) to open add transaction
           if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AddTransactionScreen(),
-              ),
-            );
+            Navigator.push(context, MaterialPageRoute(
+              builder: (context) => const AddTransactionScreen()));
           } else {
             setState(() => _currentIndex = index);
           }
