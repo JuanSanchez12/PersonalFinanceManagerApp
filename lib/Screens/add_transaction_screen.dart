@@ -61,31 +61,25 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     'Transaction Type',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  Row(
+                  Column(
                     children: [
-                      Expanded(
-                        child: RadioListTile<TransactionType>(
-                          title: const Text('Income'),
-                          value: TransactionType.income,
-                          groupValue: _selectedType,
-                          onChanged: (value) => setState(() => _selectedType = value!),
-                        ),
+                      RadioListTile<TransactionType>(
+                        title: const Text('Income'),
+                        value: TransactionType.income,
+                        groupValue: _selectedType,
+                        onChanged: (value) => setState(() => _selectedType = value!),
                       ),
-                      Expanded(
-                        child: RadioListTile<TransactionType>(
-                          title: const Text('Expense'),
-                          value: TransactionType.expense,
-                          groupValue: _selectedType,
-                          onChanged: (value) => setState(() => _selectedType = value!),
-                        ),
+                      RadioListTile<TransactionType>(
+                        title: const Text('Expense'),
+                        value: TransactionType.expense,
+                        groupValue: _selectedType,
+                        onChanged: (value) => setState(() => _selectedType = value!),
                       ),
-                      Expanded(
-                        child: RadioListTile<TransactionType>(
-                          title: const Text('Savings'),
-                          value: TransactionType.savings,
-                          groupValue: _selectedType,
-                          onChanged: (value) => setState(() => _selectedType = value!),
-                        ),
+                      RadioListTile<TransactionType>(
+                        title: const Text('Savings'),
+                        value: TransactionType.savings,
+                        groupValue: _selectedType,
+                        onChanged: (value) => setState(() => _selectedType = value!),
                       ),
                     ],
                   ),
